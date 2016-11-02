@@ -9,7 +9,7 @@ def load_urls4check(path):
         return (f.readlines())
 
 
-def is_server_respond_with_200(url):
+def get_server_respond_code(url):
     r = requests.get(url)
     return r.status_code
 
@@ -31,7 +31,7 @@ def get_domain_name(domain_name):
 def print_status(server_response, whois_response, url):
     if server_response != 200:
         print('Url:"{}" out of service'.format(url))
-    if not whois_response:
+    elif not whois_response:
         print(
             'Url:"{}" works, but no information about payment for domain'.format(url))
     else:
@@ -46,5 +46,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     for url in load_urls4check(args.path):
-        print_status(is_server_respond_with_200(
-            url.strip()), get_domain_expiration_date(url.strip()), url.strip())
+        url = url.strip()
+        print_status(get_server_respond_code(
+            url), get_domain_expiration_date(url), url)
