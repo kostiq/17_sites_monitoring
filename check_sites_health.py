@@ -2,6 +2,7 @@ import argparse
 import requests
 import whois
 from urllib.parse import urlparse
+from datetime import datetime as dt
 
 
 def load_urls4check(path):
@@ -10,33 +11,32 @@ def load_urls4check(path):
 
 
 def get_server_respond_code(url):
-    r = requests.get(url)
-    return r.status_code
+    return requests.get(url).status_code
 
 
-def get_domain_expiration_date(domain_name):
-    return (whois.query(get_domain_name(domain_name)).__dict__['expiration_date'])
-
-
-def get_domain_name(domain_name):
-    # выглядит так страшно из-за того что, whois не работает с много уровневыми доменами типа ru.wiki.org
-    # приходится если таковой налицо, возвращать один уровень домена.
-    domain_list = urlparse(domain_name).netloc.split('.')
-    if len(domain_list) > 2:
-        return (domain_list[-2] + '.' + domain_list[-1])
+def paid_for_domain(domain_name):
+    domain = whois.query(get_domain_name(domain_name))
+    if domain:
+        return domain.expiration_date > dt.now()
     else:
-        return urlparse(domain_name).netloc
+        return False
 
 
-def print_status(server_response, whois_response, url):
-    if server_response != 200:
-        print('Url:"{}" out of service'.format(url))
-    elif not whois_response:
-        print(
-            'Url:"{}" works, but no information about payment for domain'.format(url))
+def get_domain_name(url):
+    domain_parts = urlparse(url).netloc.split('.')
+    if len(domain_parts) > 2:
+        return '.'.join(domain_parts[-1:-3])
+    else:
+        return urlparse(url).netloc
+
+
+def print_status(server_response, domain_paid_response, url):
+    if server_response == 200 and domain_paid_response:
+        print('"{}" works and domain is paid!'.format(url))
     else:
         print(
-            'Url:"{}" works and domain is paid for a long time!'.format(url))
+            'Care! No information about {}'.format(url))
+
 
 if __name__ == '__main__':
 
@@ -48,4 +48,4 @@ if __name__ == '__main__':
     for url in load_urls4check(args.path):
         url = url.strip()
         print_status(get_server_respond_code(
-            url), get_domain_expiration_date(url), url)
+            url), paid_for_domain(url), url)
