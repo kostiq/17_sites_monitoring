@@ -16,10 +16,7 @@ def get_server_respond_code(url):
 
 def paid_for_domain(domain_name):
     domain = whois.query(get_domain_name(domain_name))
-    if domain:
-        return domain.expiration_date > dt.now()
-    else:
-        return False
+    return domain and domain.expiration_date > dt.now()
 
 
 def get_domain_name(url):
@@ -32,7 +29,7 @@ def get_domain_name(url):
 
 def print_status(server_response, domain_paid_response, url):
     if server_response == 200 and domain_paid_response:
-        print('"{}" works and domain is paid!'.format(url))
+        print('{} works and domain is paid!'.format(url))
     else:
         print(
             'Care! No information about {}'.format(url))
