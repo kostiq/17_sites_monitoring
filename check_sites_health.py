@@ -29,12 +29,10 @@ def get_domain_name(url):
 
 def print_status(server_response, domain_paid_response, url):
     if server_response == 200 and domain_paid_response:
-        print('{} works and domain is paid!'.format(url))
+        print('{}  status: Ok.'.format(url))
     else:
         print(
-            'Care! {}'.format(url))
-        exit(1)
-        
+            '{}  status: Bad site.'.format(url))
 
 
 if __name__ == '__main__':
@@ -44,7 +42,11 @@ if __name__ == '__main__':
         '-p', '--path', help="Path to file with urls", required=True)
     args = parser.parse_args()
 
+    return_code = 0
     for url in load_urls4check(args.path):
         url = url.strip()
         print_status(get_server_respond_code(
             url), paid_for_domain(url), url)
+        if not (get_server_respond_code(url) == 200 and paid_for_domain(url)):
+            return_code += 1
+    exit(return_code)
