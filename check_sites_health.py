@@ -32,7 +32,9 @@ def print_status(server_response, domain_paid_response, url):
         print('{} works and domain is paid!'.format(url))
     else:
         print(
-            'Care! No information about {}'.format(url))
+            'Care! {}'.format(url))
+        exit(1)
+        
 
 
 if __name__ == '__main__':
